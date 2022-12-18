@@ -81,7 +81,7 @@ function draw()
 	rect(0, groundHeight, width, height - groundHeight);
 
 	//draw the mountains
-	fill(120);
+	fill(120,120,120);
 	triangle(mountain1.x, mountain1.y,
 		mountain1.x + mountain1.width, mountain1.y,
 		mountain1.x + (mountain1.width / 2), mountain1.y - mountain1.height);
@@ -89,19 +89,25 @@ function draw()
 	triangle(mountain2.x, mountain2.y,
 		mountain2.x + mountain2.width, mountain2.y,
 		mountain2.x + (mountain2.width / 2), mountain2.y - mountain2.height);
+	
+
+	fill(185, 185, 185, moon.brightness);
+	triangle(mountain1.x, mountain1.y,
+		mountain1.x + mountain1.width, mountain1.y,
+		mountain1.x + (mountain1.width / 2), mountain1.y - mountain1.height);
     
     //TASK: You can draw the tree yourself
     
 
 	//TASK: make the scene dark by drawing a rectangle that covers the whole canvas.
 	//Use the alpha value of fill to determine how dark to make it
-	fill(0, 0, 0, darkness)
-	rect(0, 0, width, height)
+	// fill(0, 0, 0, darkness)
+	// rect(0, 0, width, height)
 
 	fill(255, 255, 255, moon.brightness)
 	ellipse(moon.x, moon.y, moon.diameter)
 
-	darkness = mouseX / 4
-	moon.brightness = mouseX / 4
+	darkness = map(mouseX, 0, width, 0, 200, true)
+	moon.brightness = map(mouseX, 0, width, 0, 1)
 
 }

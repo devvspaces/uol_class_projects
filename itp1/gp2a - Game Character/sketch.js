@@ -39,28 +39,33 @@ var obj = {
 		c: "grey", // color
 		w: 20, // width
 		h: 18, // height
+		d: 10, // depth
 		top: 72, // top_offset
 	},
 	neck: {
 		c: "#333",
 		w: 10,
 		h: 2,
+		d: 5,
 	},
 	body: {
 		c: "#05aa53",
 		w: 26,
-		h: 30
+		h: 30,
+		d: 15
 	},
 	arm: {
 		c: "#333",
 		w: 5,
 		h: 22,
 		top: 2,
+		d: 5,
 	},
 	leg: {
 		c: "grey",
 		w: 5,
 		h: 17,
+		d: 5,
 		jumping: {
 			h: 10
 		}
@@ -73,6 +78,7 @@ var obj = {
 	eye: {
 		c: "255",
 		r: 7, // radii
+		d: 4, // depth
 		inner: {
 			c: "red",
 			top: 0.5
@@ -99,6 +105,77 @@ function draw() {
 
 	gameChar_x = 45;
 	gameChar_y = 137;
+	faceFront(gameChar_x, gameChar_y);
+
+
+	//Jumping facing forwards
+	stroke(100);
+	noFill();
+	rect(220, 60, 50, 80);
+	noStroke();
+	fill(0);
+	text("2. jumping facing forwards", 220, 160);
+
+	gameChar_x = 245;
+	gameChar_y = 137;
+	jumpFaceForward(gameChar_x, gameChar_y)
+
+
+	//Walking, turned left
+	stroke(100);
+	noFill();
+	rect(20, 260, 50, 80);
+	noStroke();
+	fill(0);
+	text("3. Walking left", 20, 360);
+
+	gameChar_x = 45;
+	gameChar_y = 337;
+	walkingLeft(gameChar_x, gameChar_y)
+
+
+	//Walking, turned right
+	stroke(100);
+	noFill();
+	rect(220, 260, 50, 80);
+	noStroke();
+	fill(0);
+	text("4. Walking right", 220, 360);
+
+	gameChar_x = 245;
+	gameChar_y = 337;
+	walkingRight(gameChar_x, gameChar_y)
+
+
+	//Jumping right
+	stroke(100);
+	noFill();
+	rect(20, 460, 50, 80);
+	noStroke();
+	fill(0);
+	text("5. Jumping to the right", 20, 560);
+
+	gameChar_x = 45;
+	gameChar_y = 537;
+	jumpingRight(gameChar_x, gameChar_y)
+
+
+	//Jumping to the left
+	stroke(100);
+	noFill();
+	rect(220, 460, 50, 80);
+	noStroke();
+	fill(0);
+	text("6. Jumping to the left", 220, 560);
+
+	gameChar_x = 245;
+	gameChar_y = 537;
+	jumpLeft(gameChar_x, gameChar_y)
+
+}
+
+
+function faceFront(gameChar_x, gameChar_y) {
 	// head
 	fill(obj.head.c)
 	rect(gameChar_x - obj.head.w / 2, gameChar_y - obj.head.top, obj.head.w, obj.head.h, 2);
@@ -144,18 +221,10 @@ function draw() {
 	// left foot
 	rect(gameChar_x + 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.body.h + obj.leg.h, obj.foot.w, obj.foot.h, 2)
 
+}
 
-	//Jumping facing forwards
-	stroke(100);
-	noFill();
-	rect(220, 60, 50, 80);
-	noStroke();
-	fill(0);
-	text("2. jumping facing forwards", 220, 160);
 
-	gameChar_x = 245;
-	gameChar_y = 137;
-	//Add your code here ...
+function jumpFaceForward(gameChar_x, gameChar_y) {
 	// head
 	fill(obj.head.c)
 	rect(gameChar_x - 10, gameChar_y - obj.head.top, obj.head.w, obj.head.h, 2);
@@ -168,11 +237,11 @@ function draw() {
 
 	// neck
 	fill(obj.neck.c)
-	rect(gameChar_x - 5, gameChar_y - obj.head.top + obj.head.h, obj.neck.w, obj.neck.h)
+	rect(gameChar_x - obj.neck.w / 2, gameChar_y - obj.head.top + obj.head.h, obj.neck.w, obj.neck.h)
 
 	// body
 	fill(obj.body.c)
-	rect(gameChar_x - 13, gameChar_y - obj.head.top + obj.head.h + obj.neck.h, obj.body.w, obj.body.h, 2)
+	rect(gameChar_x - obj.body.w / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h, obj.body.w, obj.body.h, 2)
 
 	// arms
 	fill(obj.arm.c)
@@ -201,57 +270,200 @@ function draw() {
 	// left foot
 	rect(gameChar_x + 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.body.h + obj.leg.jumping.h, obj.foot.w, obj.foot.h, 2)
 
+}
 
 
-	//Walking, turned left
-	stroke(100);
-	noFill();
-	rect(20, 260, 50, 80);
-	noStroke();
-	fill(0);
-	text("3. Walking left", 20, 360);
+function walkingLeft(gameChar_x, gameChar_y) {
+	// eyes
+	fill(obj.eye.c)
+	stroke(100)
+	ellipse(gameChar_x - obj.eye.d, gameChar_y - obj.head.top + obj.eye.top, obj.eye.r)
+	noStroke()
 
-	gameChar_x = 45;
-	gameChar_y = 337;
-	//Add your code here ...
+	// head
+	fill(obj.head.c)
+	rect(gameChar_x - obj.head.d / 2, gameChar_y - obj.head.top, obj.head.d, obj.head.h);
+
+	// neck
+	fill(obj.neck.c)
+	rect(gameChar_x - obj.neck.d / 2, gameChar_y - obj.head.top + obj.head.h, obj.neck.d, obj.neck.h)
+
+	// Right arm
+	fill(obj.arm.c)
+	beginShape()
+	vertex(gameChar_x + obj.arm.d * 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h + obj.arm.d * 0.3)
+	vertex(gameChar_x + obj.arm.d * 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - obj.arm.d)
+	vertex(gameChar_x - obj.arm.d / 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.d)
+	endShape(CLOSE)
+
+	// body
+	fill(obj.body.c)
+	rect(gameChar_x - obj.body.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h, obj.body.d, obj.body.h, 2)
+
+	// left arm
+	fill(obj.arm.c)
+	beginShape()
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 10)
+	vertex(gameChar_x - obj.arm.d * 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 5)
+	vertex(gameChar_x - obj.arm.d * 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h)
+	vertex(gameChar_x - obj.arm.d / 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 8)
+	vertex(gameChar_x - obj.arm.d / 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	endShape(CLOSE)
+
+	// left leg
+	fill(obj.leg.c)
+	rect(gameChar_x - obj.leg.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.body.h, obj.leg.d, obj.leg.h)
+	// left foot
+	fill(obj.foot.c)
+	rect(gameChar_x - obj.foot.w / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.body.h + obj.leg.h, obj.foot.w, obj.foot.h, 2)
+}
 
 
-	//Walking, turned right
-	stroke(100);
-	noFill();
-	rect(220, 260, 50, 80);
-	noStroke();
-	fill(0);
-	text("4. Walking right", 220, 360);
+function walkingRight(gameChar_x, gameChar_y) {
+	// eyes
+	fill(obj.eye.c)
+	stroke(100)
+	ellipse(gameChar_x + obj.eye.d, gameChar_y - obj.head.top + obj.eye.top, obj.eye.r)
+	noStroke()
 
-	gameChar_x = 245;
-	gameChar_y = 337;
-	//Add your code here ...
+	// head
+	fill(obj.head.c)
+	rect(gameChar_x - obj.head.d / 2, gameChar_y - obj.head.top, obj.head.d, obj.head.h);
+
+	// neck
+	fill(obj.neck.c)
+	rect(gameChar_x - obj.neck.d / 2, gameChar_y - obj.head.top + obj.head.h, obj.neck.d, obj.neck.h)
+
+	// Right arm
+	fill(obj.arm.c)
+	beginShape()
+	vertex(gameChar_x - obj.arm.d * 2 - obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h + obj.arm.d * 0.3)
+	vertex(gameChar_x - obj.arm.d * 2 - obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - obj.arm.d)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + 3)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.d + 5)
+	endShape(CLOSE)
+
+	// body
+	fill(obj.body.c)
+	rect(gameChar_x - obj.body.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h, obj.body.d, obj.body.h, 2)
+
+	// left arm
+	fill(obj.arm.c)
+	beginShape()
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 8)
+	vertex(gameChar_x + obj.arm.d * 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h)
+	vertex(gameChar_x + obj.arm.d * 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 5)
+	vertex(gameChar_x - obj.arm.d / 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 10)
+	vertex(gameChar_x - obj.arm.d / 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	endShape(CLOSE)
+
+	// left leg
+	fill(obj.leg.c)
+	rect(gameChar_x - obj.leg.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.body.h, obj.leg.d, obj.leg.h)
+	// left foot
+	fill(obj.foot.c)
+	rect(gameChar_x - obj.foot.w / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.body.h + obj.leg.h, obj.foot.w, obj.foot.h, 2)
+}
 
 
-	//Jumping right
-	stroke(100);
-	noFill();
-	rect(20, 460, 50, 80);
-	noStroke();
-	fill(0);
-	text("5. Jumping to the right", 20, 560);
+function jumpLeft(gameChar_x, gameChar_y) {
+	// eyes
+	fill(obj.eye.c)
+	stroke(100)
+	ellipse(gameChar_x - obj.eye.d, gameChar_y - obj.head.top + obj.eye.top, obj.eye.r)
+	noStroke()
 
-	gameChar_x = 45;
-	gameChar_y = 537;
-	//Add your code here ...
+	// head
+	fill(obj.head.c)
+	rect(gameChar_x - obj.head.d / 2, gameChar_y - obj.head.top, obj.head.d, obj.head.h);
+
+	// neck
+	fill(obj.neck.c)
+	rect(gameChar_x - obj.neck.d / 2, gameChar_y - obj.head.top + obj.head.h, obj.neck.d, obj.neck.h)
+
+	// Right arm
+	fill(obj.arm.c)
+	beginShape()
+	vertex(gameChar_x + obj.arm.d * 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h + obj.arm.d * 0.3)
+	vertex(gameChar_x + obj.arm.d * 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - obj.arm.d)
+	vertex(gameChar_x - obj.arm.d / 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.d)
+	endShape(CLOSE)
+
+	// body
+	fill(obj.body.c)
+	rect(gameChar_x - obj.body.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h, obj.body.d, obj.body.h, 2)
+
+	// left arm
+	fill(obj.arm.c)
+	beginShape()
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 10)
+	vertex(gameChar_x - obj.arm.d * 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 5)
+	vertex(gameChar_x - obj.arm.d * 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h)
+	vertex(gameChar_x - obj.arm.d / 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 8)
+	vertex(gameChar_x - obj.arm.d / 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	endShape(CLOSE)
+
+	// left leg
+	fill(obj.leg.c)
+	rect(gameChar_x - obj.leg.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.body.h, obj.leg.d, obj.leg.jumping.h)
+	// left foot
+	fill(obj.foot.c)
+	rect(gameChar_x - obj.foot.w / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.body.h + obj.leg.jumping.h, obj.foot.w, obj.foot.h, 2)
+}
 
 
-	//Jumping to the left
-	stroke(100);
-	noFill();
-	rect(220, 460, 50, 80);
-	noStroke();
-	fill(0);
-	text("6. Jumping to the left", 220, 560);
+function jumpingRight(gameChar_x, gameChar_y) {
+	// eyes
+	fill(obj.eye.c)
+	stroke(100)
+	ellipse(gameChar_x + obj.eye.d, gameChar_y - obj.head.top + obj.eye.top, obj.eye.r)
+	noStroke()
 
-	gameChar_x = 245;
-	gameChar_y = 537;
-	//Add your code here ...
+	// head
+	fill(obj.head.c)
+	rect(gameChar_x - obj.head.d / 2, gameChar_y - obj.head.top, obj.head.d, obj.head.h);
 
+	// neck
+	fill(obj.neck.c)
+	rect(gameChar_x - obj.neck.d / 2, gameChar_y - obj.head.top + obj.head.h, obj.neck.d, obj.neck.h)
+
+	// Right arm
+	fill(obj.arm.c)
+	beginShape()
+	vertex(gameChar_x - obj.arm.d * 2 - obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h + obj.arm.d * 0.3)
+	vertex(gameChar_x - obj.arm.d * 2 - obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - obj.arm.d)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + 3)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.d + 5)
+	endShape(CLOSE)
+
+	// body
+	fill(obj.body.c)
+	rect(gameChar_x - obj.body.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h, obj.body.d, obj.body.h, 2)
+
+	// left arm
+	fill(obj.arm.c)
+	beginShape()
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 8)
+	vertex(gameChar_x + obj.arm.d * 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h)
+	vertex(gameChar_x + obj.arm.d * 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 5)
+	vertex(gameChar_x - obj.arm.d / 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top + obj.arm.h - 10)
+	vertex(gameChar_x - obj.arm.d / 2 + obj.arm.d, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	vertex(gameChar_x - obj.arm.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.arm.top)
+	endShape(CLOSE)
+
+	// left leg
+	fill(obj.leg.c)
+	rect(gameChar_x - obj.leg.d / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.body.h, obj.leg.d, obj.leg.jumping.h)
+	// left foot
+	fill(obj.foot.c)
+	rect(gameChar_x - obj.foot.w / 2, gameChar_y - obj.head.top + obj.head.h + obj.neck.h + obj.body.h + obj.leg.jumping.h, obj.foot.w, obj.foot.h, 2)
 }
