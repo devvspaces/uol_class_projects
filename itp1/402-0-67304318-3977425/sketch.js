@@ -36,27 +36,39 @@ var det = {
 	image: './det.png'
 };
 
-function preload()
-{
+function preload() {
 	perp.image = loadImage(perp.image);
 	det.image = loadImage(det.image);
 	mapImage = loadImage("./map.png");
 	overlayImage = loadImage("./overlay.png")
 }
 
-function setup()
-{
+function setup() {
 	createCanvas(1024, 768);
 	currentRoadObj = getCurrentRoad();
 
 }
 
 
-function draw()
-{
+function draw() {
 	///////////////////ADD YOUR CODE HERE///////////////////
-	if (currentRoad == "Gates Avenue")
-	{
+	if (currentRoad == "Gates Avenue") {
+		direction = "south";
+	}
+	
+	if (currentRoad == "Reynolds Street"){
+		direction = "east";
+	}
+
+	if (currentRoad == "Meyers Way"){
+		direction = "north";
+	}
+
+	if (currentRoad == "Gosling Road"){
+		direction = "east";
+	}
+
+	if (currentRoad == "Turing Place"){
 		direction = "south";
 	}
 
@@ -68,8 +80,7 @@ function draw()
 	currentRoadObj = getCurrentRoad();
 	updateDirection();
 
-	if (perp.caught === 0)
-	{
+	if (perp.caught === 0) {
 		det.locationX += det.speedX;
 		det.locationY += det.speedY;
 	}
@@ -92,8 +103,7 @@ function draw()
 	noStroke();
 
 	//the perp has been caught
-	if (dist(det.locationX, det.locationY, perp.locationX, perp.locationY) < 3)
-	{
+	if (dist(det.locationX, det.locationY, perp.locationX, perp.locationY) < 3) {
 		//display message to the player
 		fill(0, 220, 0);
 		text("Just in the nick of time! \nYou caught " + perp.name, width / 2, height / 2);
@@ -101,8 +111,7 @@ function draw()
 	}
 
 	//not on any roads, therefore the game is lost.
-	if (currentRoadObj == null || (det.speedX == 0 && det.speedY == 0))
-	{
+	if (currentRoadObj == null || (det.speedX == 0 && det.speedY == 0)) {
 		fill(255, 0, 0);
 		text("You let " + perp.name + " get away.\n Better luck next time.", width / 2, height / 2);
 		perp.caught = -1;
@@ -114,8 +123,7 @@ function draw()
 
 }
 
-function hud()
-{
+function hud() {
 	push();
 	fill(250);
 	noStroke();
@@ -124,53 +132,42 @@ function hud()
 	pop();
 }
 
-function updateDirection()
-{
-	if (direction != undefined)
-	{
+function updateDirection() {
+	if (direction != undefined) {
 		direction = direction.toLowerCase();
 
-		if (direction == "north")
-		{
+		if (direction == "north") {
 			det.speedX = 0;
 			det.speedY = -1;
 		}
-		else if (direction == "south")
-		{
+		else if (direction == "south") {
 			det.speedX = 0;
 			det.speedY = 1;
 		}
-		else if (direction == "west")
-		{
+		else if (direction == "west") {
 			det.speedX = -1;
 			det.speedY = 0;
 		}
-		else if (direction == "east")
-		{
+		else if (direction == "east") {
 			det.speedX = 1;
 			det.speedY = 0;
 		}
-		else
-		{
+		else {
 			det.speedX = 0;
 			det.speedY = 0;
 		}
 	}
 }
 
-function getCurrentRoad()
-{
+function getCurrentRoad() {
 	var road = null;
-	for (var i = 0; i < roads.length; i++)
-	{
-		if (mapImage.get(det.locationX, det.locationY)[0] == roads[i].strokeC)
-		{
+	for (var i = 0; i < roads.length; i++) {
+		if (mapImage.get(det.locationX, det.locationY)[0] == roads[i].strokeC) {
 			road = roads[i];
 		}
 	}
 
-	if (road && currentRoad != road.name)
-	{
+	if (road && currentRoad != road.name) {
 		currentRoad = road.name;
 		det.locationX = road.start.x;
 		det.locationY = road.start.y;
@@ -182,76 +179,76 @@ function getCurrentRoad()
 var roadWidth = 25;
 
 var roads = [
-{
-	start:
 	{
-		x: 136,
-		y: 72
+		start:
+		{
+			x: 136,
+			y: 72
+		},
+		end:
+		{
+			x: 136,
+			y: 633
+		},
+		name: 'Gates Avenue',
+		strokeC: 170
 	},
-	end:
 	{
-		x: 136,
-		y: 633
+		start:
+		{
+			x: 136,
+			y: 633
+		},
+		end:
+		{
+			x: 324,
+			y: 633
+		},
+		name: 'Reynolds Street',
+		strokeC: 171
 	},
-	name: 'Gates Avenue',
-	strokeC: 170
-},
-{
-	start:
 	{
-		x: 136,
-		y: 633
+		start:
+		{
+			x: 324,
+			y: 633
+		},
+		end:
+		{
+			x: 324,
+			y: 384
+		},
+		name: 'Meyers Way',
+		strokeC: 172
 	},
-	end:
 	{
-		x: 324,
-		y: 633
+		start:
+		{
+			x: 324,
+			y: 384
+		},
+		end:
+		{
+			x: 449,
+			y: 384
+		},
+		name: 'Gosling Road',
+		strokeC: 173
 	},
-	name: 'Reynolds Street',
-	strokeC: 171
-},
-{
-	start:
 	{
-		x: 324,
-		y: 633
-	},
-	end:
-	{
-		x: 324,
-		y: 384
-	},
-	name: 'Meyers Way',
-	strokeC: 172
-},
-{
-	start:
-	{
-		x: 324,
-		y: 384
-	},
-	end:
-	{
-		x: 449,
-		y: 384
-	},
-	name: 'Gosling Road',
-	strokeC: 173
-},
-{
-	start:
-	{
-		x: 449,
-		y: 384
-	},
-	end:
-	{
-		x: 449,
-		y: 696
-	},
-	name: 'Turing Place',
-	strokeC: 174
-}];
+		start:
+		{
+			x: 449,
+			y: 384
+		},
+		end:
+		{
+			x: 449,
+			y: 696
+		},
+		name: 'Turing Place',
+		strokeC: 174
+	}];
 var perp = {
 	caught: 0,
 	name: 'Matz',
