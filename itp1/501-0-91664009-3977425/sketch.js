@@ -44,4 +44,8 @@ function setup() {
 function draw() {
     // add your for loop below
 
+    for (let index = 0; index < 7; index++) {
+        image(beadImg, 1083, 310 + (index * 60))
+    }
+
 }
