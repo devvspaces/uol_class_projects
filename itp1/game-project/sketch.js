@@ -107,10 +107,10 @@ function Collectable(x, y, size, found) {
             [gameChar_x, gameChar_y],
             [gameChar_x - obj.foot.w, gameChar_y],  // left foot
             [gameChar_x + obj.foot.w, gameChar_y],  // right foot
-            [gameChar_x - obj.body.w / 2, gameChar_y + obj.foot.h + obj.leg.h],  // lower-left body
-            [gameChar_x + obj.body.w / 2, gameChar_y + obj.foot.h + obj.leg.h],  // lower-right body
-            [gameChar_x - obj.body.w / 2, gameChar_y + obj.foot.h + obj.leg.h + obj.body.h],  // upper-left body
-            [gameChar_x + obj.body.w / 2, gameChar_y + obj.foot.h + obj.leg.h + obj.body.h],  // upper-right body
+            [gameChar_x - obj.body.w / 2, gameChar_y - obj.foot.h - obj.leg.h],  // lower-left body
+            [gameChar_x + obj.body.w / 2, gameChar_y - obj.foot.h - obj.leg.h],  // lower-right body
+            [gameChar_x - obj.body.w / 2, gameChar_y - obj.foot.h - obj.leg.h - obj.body.h],  // upper-left body
+            [gameChar_x + obj.body.w / 2, gameChar_y - obj.foot.h - obj.leg.h - obj.body.h],  // upper-right body
             [gameChar_x - (obj.arm.w + (obj.body.w / 2)), (gameChar_y - obj.height) + obj.head.h + obj.neck.h + obj.arm.top],  // upper-left arm
             [gameChar_x - (obj.arm.w + (obj.body.w / 2)), (gameChar_y - obj.height) + obj.head.h + obj.neck.h + obj.arm.top + (obj.arm.h / 2)],  // half-left arm
             [gameChar_x + (obj.arm.w + (obj.body.w / 2)), (gameChar_y - obj.height) + obj.head.h + obj.neck.h + obj.arm.top],  // upper-right arm
@@ -123,7 +123,7 @@ function Collectable(x, y, size, found) {
             [gameChar_x + (obj.head.w / 2), (gameChar_y - obj.height) + (obj.head.h / 2)],  // upper-half-right head
         ]
 
-        for (let i = 0; i < points_to_check.length; i++){
+        for (let i = 0; i < points_to_check.length; i++) {
             var points = points_to_check[i];
             var x = points[0];
             var y = points[1];
@@ -151,6 +151,16 @@ const COLLECTIBLE_TYPES = [
 ]
 
 
+var platforms = [
+    {
+        x: 0,
+        y: 0,
+        length: 0,
+        draw: () => { },
+        checkContact: (gc_x, gc_y) => { }
+    }
+]
+var jumpedFromY;
 var clouds;
 var mountains;
 var trees_x;
@@ -181,8 +191,8 @@ const defaultLives = 3;
 var gameOver;
 var gameCompleted;
 
-const STARTING_POINT = -20000;
-const ENDING_POINT = 20000;
+const STARTING_POINT = 0;
+const ENDING_POINT = 3000;
 
 
 const TREE_HEIGHT_MIN = 100;
@@ -244,11 +254,13 @@ class SoundBuilder {
 let Sound = new SoundBuilder();
 
 function startGame() {
+    // Init ground x an y
     ground_y = canvasHeight * 3 / 4;
     ground_height = canvasHeight - ground_y
 
     gameChar_x = 0;
     gameChar_y = ground_y;
+    jumpedFromY = ground_y;
 
     // Create random trees
     trees_x = []
@@ -286,8 +298,7 @@ function startGame() {
     }
 
     // Create random clouds
-    clouds = [
-    ]
+    clouds = []
 
     for (let i = STARTING_POINT; i < ENDING_POINT; i += 400) {
         clouds.push({
@@ -333,6 +344,24 @@ function startGame() {
             x_pos: x_pos,
             width: width,
         });
+    }
+
+    // Create platforms
+    platforms = [];
+
+    for (let i = STARTING_POINT; i < ENDING_POINT; i += 400) {
+        var data = {
+            x_pos: random(i - 100, i + 100),
+            y_pos: random(30, 120),
+            size: random(10, 30),
+            found: false
+        }
+
+        var platform_x = random(i, i + 250)
+        var platform_y = random([100, 200])
+        var length = random(70, 200)
+
+        platforms.push(createPlatform(platform_x, ground_y - platform_y, length))
     }
 
     isLeft = false;
@@ -420,8 +449,8 @@ function draw() {
     })
 
     // Check if character is jumping
-    if (isJumping && (ground_y - gameChar_y) < obj.jumpLength) {
-        gameChar_y -= 4;
+    if (isJumping && (jumpedFromY - gameChar_y) < obj.jumpLength) {
+        gameChar_y = gameChar_y - 4
     }
 
     // Check if character should be falling
@@ -434,11 +463,7 @@ function draw() {
     if (gameChar_y >= ground_y && !isPlummeting) {
         isFalling = false;
         gameChar_y = ground_y;
-    }
-
-    // Check if character is falling, then move down
-    if (isFalling) {
-        gameChar_y += 4;
+        jumpedFromY = ground_y;
     }
 
     // The game character
@@ -472,6 +497,30 @@ function draw() {
     }
 
 
+    // Check if character is falling, then move down
+    if (isFalling) {
+        console.log("running")
+
+        // Check if landed on platform
+        let landed = false;
+
+        platforms.forEach(platform => {
+            if (platform.checkContact(gameChar_x, gameChar_y)) {
+                landed = true;
+                character_draw_function = faceFront;
+                jumpedFromY = platform.y;
+                isFalling = false;
+                return;
+            }
+        })
+
+        if (!landed) {
+            gameChar_y += 4;
+            isFalling = false;
+        }
+    }
+
+
     if (isPlummeting) {
         gameChar_y += 5;
 
@@ -480,6 +529,10 @@ function draw() {
         isRight = false;
     }
 
+    // Draw the platform
+    platforms.forEach(platform => {
+        platform.draw()
+    })
 
     // Draw the game character
     character_draw_function(gameChar_x, gameChar_y);
@@ -511,8 +564,10 @@ function draw() {
     }
 }
 
-// Created a simple function to draw a triangle (mountains), with default values
-// This can help us to draw multiple mountains with different sizes and positions
+/**
+ * Created a simple function to draw a triangle (mountains), with default values
+ * This can help us to draw multiple mountains with different sizes and positions
+ */
 function buildTriangle({ start, width = 100, height = 250, color = "#333" }) {
     push();
     fill(color);
@@ -538,7 +593,7 @@ function keyPressed() {
     } else if (keyCode == RIGHT) {
         isRight = true;
     } else if (keyCode == SPACE) {
-        if (!isFalling) {
+        if (!isJumping && !isFalling) {
             Sound.jump();
             isJumping = true;
         }
@@ -900,31 +955,12 @@ function drawCollectable(t_collectable) {
     pop();
 }
 
-function checkCollectable(t_collectable) {
-    if (abs(ground_y - gameChar_y) > t_collectable.y_pos) {
-        return
-    }
-
-    if (abs(t_collectable.y_pos - abs(ground_y - gameChar_y)) <= obj.height) {
-        var total_x_dist = obj.body.w
-        if (isLeft || isRight) {
-            total_x_dist = obj.body.d
-        }
-        if (abs(gameChar_x - t_collectable.x_pos) <= total_x_dist) {
-            t_collectable.found = true;
-            score++;
-            Sound.collect()
-        }
-    }
-}
-
 function drawCanyon(t_canyon) {
     push();
     fill(sky)
     rect(t_canyon.x_pos, ground_y, t_canyon.width, ground_height)
     pop()
 }
-
 
 function checkCanyon(t_canyon) {
     var completed = isPlummeting;
@@ -1034,4 +1070,29 @@ function gameComplete() {
     fill(158, 52, 235)
     text("Level complete.\nPress space to\ncontinue.", width / 4 - 400, height / 5)
     pop()
+}
+
+function createPlatform(x, y, length) {
+    var p = {
+        x: x,
+        y: y,
+        length: length,
+        draw: function () {
+            push();
+            stroke('black')
+            fill("#002E16");
+            rect(this.x, this.y, this.length, 20);
+            pop();
+        },
+        checkContact: function (gc_x, gc_y) {
+            if (gc_x > this.x && gc_x < this.x + this.length) {
+                var d = abs(this.y - gc_y);
+                if (d >= 0 && d < 4) {
+                    return true;
+                }
+                return false;
+            }
+        }
+    }
+    return p;
 }
