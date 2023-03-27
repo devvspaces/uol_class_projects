@@ -1,6 +1,6 @@
 /*
 
-Game project 5: Multiple Interactables
+Game project Final
 
 */
 
@@ -17,6 +17,9 @@ var isFalling;
 var isPlummeting;
 var isJumping;
 
+// Character object
+// Character features can be easily customized from here e.g
+// Height, size, color, jump length (how high it can jump)
 var obj = {
     head: {
         c: "#020e21", // color
@@ -71,29 +74,49 @@ var obj = {
     jumpLength: 100,
 };
 
-var canyons = [
-    {
-        x_pos: 0,
-        width: 0,
-    }
-]
+var canyons;
 
-// Idea is there can be any type of collectable
-function Collectable(x, y, size, found) {
+
+// Idea is there can be any type of collectable, circle, triangle or more
+var collectibleTypes = {
+    "circle": {
+        draw: function (collectible) {
+            push();
+            fill(`rgb(${Math.round(random(0, 255))}, ${Math.round(random(0, 100))}, ${Math.round(random(0, 200))})`);
+            stroke("black")
+            strokeWeight(2)
+            ellipse(collectible.x_pos, ground_y - collectible.y_pos, collectible.size)
+            pop();
+        }
+    },
+    "rectangle": {
+        draw: function (collectible) {
+            push();
+            fill(`rgb(${Math.round(random(0, 255))}, ${Math.round(random(0, 100))}, ${Math.round(random(0, 200))})`);
+            stroke("black")
+            strokeWeight(2)
+            rect(collectible.x_pos - (collectible.size / 2), (ground_y - collectible.y_pos) - (collectible.size / 2), collectible.size)
+            pop();
+        }
+    }
+}
+
+function Collectable(x, y, size, found, collectibleType) {
     this.x_pos = x;
     this.y_pos = y;
     this.size = size;
     this.found = found;
 
+    // Get selected collectible type
+    this.collectibleType = collectibleTypes[collectibleType]
+
+    // Use the collectible type selected to draw this collectible
+    // this is passed because it's the current object
     this.draw = function () {
-        push();
-        fill(`rgb(${Math.round(random(0, 255))}, ${Math.round(random(0, 100))}, ${Math.round(random(0, 200))})`);
-        stroke("black")
-        strokeWeight(2)
-        rect(this.x_pos - (this.size / 2), (ground_y - this.y_pos) - (this.size / 2), this.size)
-        pop();
+        this.collectibleType.draw(this)
     }
 
+    // If a collectible is in range with character, updates scores
     this.checkCollectable = function () {
         if (this.inRange()) {
             this.found = true;
@@ -102,7 +125,13 @@ function Collectable(x, y, size, found) {
         }
     }
 
+    // Checks if a collectible is in range with a character
     this.inRange = function () {
+
+        // These are all points to check for an object
+        // As collectibles can be placed in different positions, it's important to check
+        // with high accuracy if any point of the character has touched the collectible
+        // NOTE: the more the points the more accurate
         var points_to_check = [
             [gameChar_x, gameChar_y],
             [gameChar_x - obj.foot.w, gameChar_y],  // left foot
@@ -133,6 +162,7 @@ function Collectable(x, y, size, found) {
         }
     }
 
+    // Draws the collectibles
     this.display = function () {
         if (!this.found) {
             this.draw();
@@ -146,20 +176,8 @@ var collectables = [
     new Collectable(0, 0, 0, false)
 ]
 
-const COLLECTIBLE_TYPES = [
-    Collectable,
-]
 
-
-var platforms = [
-    {
-        x: 0,
-        y: 0,
-        length: 0,
-        draw: () => { },
-        checkContact: (gc_x, gc_y) => { }
-    }
-]
+var platforms = []
 var jumpedFromY;
 var clouds;
 var mountains;
@@ -168,6 +186,7 @@ var trees_height;
 var trees_color;
 var cameraPosX;
 var sky;
+var enemies;
 
 // This variable is to store the current game character draw function
 var character_draw_function;
@@ -185,8 +204,9 @@ const LEFT = 37;
 const RIGHT = 39;
 const SPACE = 32;
 
+// Lives of character
 var lives;
-const defaultLives = 3;
+const defaultLives = 3;  // Defautls to 3
 
 var gameOver;
 var gameCompleted;
@@ -205,6 +225,7 @@ const MOUNTAIN_COLORS = [
     "#822e04",
 ]
 
+// Sound builder for playing sounds
 class SoundBuilder {
     jumpSound;
     collectSound;
@@ -216,6 +237,7 @@ class SoundBuilder {
         this.jumpSound = null;
     }
 
+    // Loads all required game sounds
     init() {
         soundFormats('mp3', 'wav');
         this.jumpSound = loadSound("assets/sounds/jump.wav");
@@ -225,33 +247,38 @@ class SoundBuilder {
         this.deathSound = loadSound("assets/sounds/mixkit-creature-cry-of-hurt-2208.wav");
     };
 
+    // When player jumps
     jump() {
         this.jumpSound.play();
         this.jumpSound.setVolume(0.1);
     };
 
+    // When collectible is collected
     collect() {
         this.collectSound.play();
         this.collectSound.setVolume(0.1);
     };
 
+    // When game is completed
     gameComplete() {
         this.completeSound.play();
         this.completeSound.setVolume(0.1);
     };
 
+    // When game is over
     gameOver() {
         this.endSound.play();
         this.endSound.setVolume(0.1);
     };
 
+    // When player plummets
     falling() {
         this.deathSound.play();
         this.deathSound.setVolume(0.1);
     }
 }
 
-let Sound = new SoundBuilder();
+let Sound;
 
 function startGame() {
     // Init ground x an y
@@ -280,6 +307,7 @@ function startGame() {
     // Create random collectables
     collectables = []
 
+    // Randomly create collectables, makes sure they are well separated
     for (let i = STARTING_POINT; i < ENDING_POINT; i += 200) {
         var data = {
             x_pos: random(i - 100, i + 100),
@@ -288,9 +316,12 @@ function startGame() {
             found: false
         }
 
-        // continue if collectable is too close to gameChar_x
-        const CollectibleType = random(COLLECTIBLE_TYPES);
-        var collectable = new CollectibleType(data.x_pos, data.y_pos, data.size, data.found);
+        // Generate collectibles of random types
+        // Can add more types to collectibleTypes with their draw function
+        const collectibleType = random(Object.keys(collectibleTypes));
+        var collectable = new Collectable(data.x_pos, data.y_pos, data.size, data.found, collectibleType);
+
+        // Continue if collectable is too close to gameChar_x
         if (collectable.inRange()) {
             continue;
         }
@@ -300,6 +331,7 @@ function startGame() {
     // Create random clouds
     clouds = []
 
+    // Randomly create clouds, makes sure they are well separated
     for (let i = STARTING_POINT; i < ENDING_POINT; i += 400) {
         clouds.push({
             x: random(i - 100, i + 100),
@@ -309,6 +341,8 @@ function startGame() {
 
     // Create random mountains
     mountains = []
+
+    // Randomly create mountains, makes sure they are well separated
     for (let i = STARTING_POINT; i < ENDING_POINT; i += 500) {
         var start = random(i - 100, i + 100);
         var width = random(150, 300);
@@ -324,6 +358,9 @@ function startGame() {
 
     // Create random canyons
     canyons = []
+
+    // Randomly create canyons
+    // Makes sure they are spread apart
     for (let i = STARTING_POINT; i < ENDING_POINT; i += 700) {
         var x_pos = random(i - 100, i + 100);
 
@@ -349,19 +386,27 @@ function startGame() {
     // Create platforms
     platforms = [];
 
+    // Create random platforms
+    // Possible y values are 100 and 200 from the ground
+    // x values range from the start to the end of the game
+    // Makes sure they are spread apart
     for (let i = STARTING_POINT; i < ENDING_POINT; i += 400) {
-        var data = {
-            x_pos: random(i - 100, i + 100),
-            y_pos: random(30, 120),
-            size: random(10, 30),
-            found: false
-        }
-
         var platform_x = random(i, i + 250)
         var platform_y = random([100, 200])
         var length = random(70, 200)
 
         platforms.push(createPlatform(platform_x, ground_y - platform_y, length))
+    }
+
+    // Enemies
+    enemies = []
+
+    // Randomly create enemies
+    for (let i = STARTING_POINT; i < ENDING_POINT; i += 700) {
+        var platform_x = random(i, i + 250)
+        var length = random(70, 120)
+
+        enemies.push(new Enemy(platform_x, ground_y - 10, length))
     }
 
     isLeft = false;
@@ -381,19 +426,26 @@ function startGame() {
 
     flagpole = {
         isReached: false,
-        x_pos: 1500,
+        x_pos: 3000,
         height: 500,
     }
 }
 
 function initGame() {
     lives = defaultLives;
+
+    // Start new game
     startGame();
+
+    // Init game status
     gameOver = false;
     gameCompleted = false;
 }
 
 function preload() {
+    // Load sounds
+    Sound = new SoundBuilder();
+
     // load sounds
     Sound.init();
 }
@@ -449,12 +501,12 @@ function draw() {
     })
 
     // Check if character is jumping
-    if (isJumping && (jumpedFromY - gameChar_y) < obj.jumpLength) {
-        gameChar_y = gameChar_y - 4
+    if (isJumping && ((jumpedFromY - gameChar_y) < obj.jumpLength)) {
+        gameChar_y -= 4
     }
 
     // Check if character should be falling
-    if ((ground_y - gameChar_y) >= obj.jumpLength || !isJumping) {
+    if ((jumpedFromY - gameChar_y) >= obj.jumpLength) {
         isFalling = true;
         isJumping = false;
     }
@@ -499,8 +551,6 @@ function draw() {
 
     // Check if character is falling, then move down
     if (isFalling) {
-        console.log("running")
-
         // Check if landed on platform
         let landed = false;
 
@@ -516,7 +566,6 @@ function draw() {
 
         if (!landed) {
             gameChar_y += 4;
-            isFalling = false;
         }
     }
 
@@ -540,6 +589,15 @@ function draw() {
     // Draw flagpole
     checkReachedFlagpole()
     drawFlagPole()
+
+    for (var enemyIndex = 0; enemyIndex < enemies.length; enemyIndex++) {
+        var enemy = enemies[enemyIndex];
+        enemy.draw()
+        if (enemy.checkContact(gameChar_x, gameChar_y)) {
+            killLive(gameOver)
+        }
+
+    }
 
     // Pop the camera translation
     pop();
@@ -604,9 +662,11 @@ function keyReleased() {
     if (keyCode == LEFT) {
         isLeft = false;
         isJumping = false;
+        isFalling = true;
     } else if (keyCode == RIGHT) {
         isRight = false;
         isJumping = false;
+        isFalling = true;
     }
 }
 
@@ -962,6 +1022,7 @@ function drawCanyon(t_canyon) {
     pop()
 }
 
+// Check if a user has fallen into a canyon
 function checkCanyon(t_canyon) {
     var completed = isPlummeting;
     if ((gameChar_y >= ground_y) && ((t_canyon.x_pos < gameChar_x) && (gameChar_x < (t_canyon.x_pos + t_canyon.width)))) {
@@ -989,6 +1050,7 @@ function drawFlagPole() {
     pop()
 }
 
+// Check if a user has reached the flagpole
 function checkReachedFlagpole() {
     var completed = gameCompleted
     var d = abs(gameChar_x - flagpole.x_pos)
@@ -1009,6 +1071,8 @@ function drawScore() {
     pop()
 }
 
+
+// Draws the lives at the top
 function drawLives() {
     push()
     let x = 30   // x position
@@ -1030,22 +1094,28 @@ function drawLives() {
     pop()
 }
 
+
+// Kills a character by reducing
+// life and restarting game
+function killLive(ended) {
+    if (lives > 0) {
+        lives--;
+    }
+
+    if (lives > 0) {
+        startGame();
+    }
+
+    if (lives == 0) {
+        gameOver = true
+        if (!ended && gameOver) Sound.gameOver()
+    }
+}
+
 function checkPlayerDie() {
     push()
-    var ended = gameOver
     if (isPlummeting && (gameChar_y > height + obj.height)) {
-        if (lives > 0) {
-            lives--;
-        }
-
-        if (lives > 0) {
-            startGame();
-        }
-
-        if (lives == 0) {
-            gameOver = true
-            if (!ended && gameOver) Sound.gameOver()
-        }
+        killLive(gameOver)
     }
     pop()
 }
@@ -1095,4 +1165,36 @@ function createPlatform(x, y, length) {
         }
     }
     return p;
+}
+
+function Enemy(x, y, range) {
+    this.x = x;
+    this.y = y;
+    this.range = range;
+
+    this.currentX = x;
+    this.inc = 1;
+
+    this.update = function () {
+        this.currentX += this.inc
+        if (this.currentX >= this.x + this.range) {
+            this.inc = -1
+        } else if (this.currentX <= this.x) {
+            this.inc = 1
+        }
+    }
+
+    this.draw = function () {
+        this.update()
+        fill(255, 0, 0)
+        ellipse(this.currentX, this.y, 20)
+    }
+
+    this.checkContact = function (gc_x, gc_y) {
+        var distance = dist(gc_x, gc_y, this.currentX, this.y)
+        if (distance < 11) {
+            return true
+        }
+        return false;
+    }
 }
